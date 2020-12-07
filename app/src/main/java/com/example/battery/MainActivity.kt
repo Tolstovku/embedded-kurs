@@ -12,24 +12,35 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
+//import com.google.android.gms.maps.GoogleMap
+//import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.gms.maps.CameraUpdateFactory
+//import com.google.android.gms.maps.CameraUpdateFactory
 
-import com.google.android.gms.maps.model.LatLng
+//import com.google.android.gms.maps.model.LatLng
 
-import com.google.android.gms.tasks.Task
+//import com.google.android.gms.tasks.Task
 
 import androidx.annotation.NonNull
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import com.example.battery.ui.home.MapsFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.places.GeoDataClient
 import com.google.android.gms.location.places.PlaceDetectionClient
 import com.google.android.gms.location.places.Places
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.Task
 
-import com.google.android.gms.tasks.OnCompleteListener
+//import com.google.android.gms.location.FusedLocationProviderClient
+//import com.google.android.gms.location.LocationServices
+//import com.google.android.gms.location.places.GeoDataClient
+//import com.google.android.gms.location.places.PlaceDetectionClient
+//import com.google.android.gms.location.places.Places
+//
+//import com.google.android.gms.tasks.OnCompleteListener
 
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -37,12 +48,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mMap : GoogleMap;
     var mLastKnownLocation : Location? = null;
     lateinit var mGeoDataClient : GeoDataClient;
-    lateinit var mPlaceDetectionClient :PlaceDetectionClient;
-    lateinit var mFusedLocationProviderClient :FusedLocationProviderClient;
+    lateinit var mPlaceDetectionClient : PlaceDetectionClient;
+    lateinit var mFusedLocationProviderClient : FusedLocationProviderClient;
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //EVE and here maybe?
+        supportFragmentManager.beginTransaction().add(R.id.map, SupportMapFragment(), "map").commit()
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -64,6 +77,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        //EVE The problem is here
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        mapFragment?.getMapAsync(this)
 
 //        MapKitFactory.setApiKey("5421be41-5e3a-4e7a-b0f7-ae6d852167bc")
 //        MapKitFactory.initialize(this)
@@ -130,17 +146,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    override fun onMapReady(map: GoogleMap) {
-        mMap = map;
-
-        // Do other setup activities here too, as described elsewhere in this tutorial.
-
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
-    }
     private fun getDeviceLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare
@@ -154,7 +159,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                         // Set the map's camera position to the current location of the device.
                         mLastKnownLocation = task.result
                         if (mLastKnownLocation != null) {
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            mMap.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
                                 LatLng(mLastKnownLocation!!.latitude,
                                     mLastKnownLocation!!.longitude), 12.toFloat()))
                         }
@@ -162,7 +168,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                         Log.d("XOXO", "Current location is null. Using defaults.")
                         Log.e("XOXO", "Exception: %s", task.exception)
                         mMap?.moveCamera(CameraUpdateFactory
-                            .newLatLngZoom(LatLng(45.0, 45.0), 12.toFloat()))
+                            .newLatLngZoom(LatLng(45.0, 45.0), 1.toFloat()))
                         mMap?.uiSettings?.isMyLocationButtonEnabled = false
                     }
                 }
@@ -170,5 +176,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)
         }
+    }
+
+
+    override fun onMapReady(map: GoogleMap) {
+        mMap = map
+        println("XOXO cool life")
+
+        // ...
+
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI()
+
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation()
     }
 }

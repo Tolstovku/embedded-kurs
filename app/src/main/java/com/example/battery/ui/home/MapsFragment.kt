@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.battery.MainActivity
 import com.example.battery.R
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.places.Places
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -42,7 +45,9 @@ class MapsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFragment?.getMapAsync(callback)
+
+//        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        //This should go to activity but i just cant find map in it
+//        mapFragment?.getMapAsync(/*?*/)
     }
 }
