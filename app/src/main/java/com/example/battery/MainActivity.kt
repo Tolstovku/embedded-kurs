@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -24,6 +25,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.annotation.NonNull
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import androidx.navigation.fragment.NavHostFragment
 import com.example.battery.ui.home.MapsFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -44,6 +46,7 @@ import com.google.android.gms.tasks.Task
 
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+    val random = 123;
     var mLocationPermissionGranted : Boolean = false;
     lateinit var mMap : GoogleMap;
     var mLastKnownLocation : Location? = null;
@@ -55,7 +58,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //EVE and here maybe?
-        supportFragmentManager.beginTransaction().add(R.id.map, SupportMapFragment(), "map").commit()
+        supportFragmentManager.beginTransaction().add(R.id.map, MapsFragment(), "map").commit()
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -76,15 +79,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
-        //EVE The problem is here
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFragment?.getMapAsync(this)
-
-//        MapKitFactory.setApiKey("5421be41-5e3a-4e7a-b0f7-ae6d852167bc")
-//        MapKitFactory.initialize(this)
-
-        // Укажите имя activity вместо map.
     }
 
     private fun getLocationPermission() {
@@ -179,16 +173,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
+    //Doesnt work for some reason idk
     override fun onMapReady(map: GoogleMap) {
         mMap = map
-        println("XOXO cool life")
-
-        // ...
-
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI()
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation()
     }
+
+    fun initMap() {
+        updateLocationUI()
+
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation()
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.example.battery.ui.home
 
+import android.app.Activity
+import android.content.Context
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
@@ -20,6 +22,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsFragment : Fragment() {
 
+    lateinit var activity : MainActivity;
     private val callback = OnMapReadyCallback { googleMap ->
         /**
          * Manipulates the map once available.
@@ -30,9 +33,9 @@ class MapsFragment : Fragment() {
          * install it inside the SupportMapFragment. This method will only be triggered once the
          * user has installed Google Play services and returned to the app.
          */
-        val sydney = LatLng(-34.0, 151.0)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        // EPIC kostil gigigigigigigig
+        activity.mMap = googleMap;
+        activity.initMap()
     }
 
     override fun onCreateView(
@@ -46,8 +49,13 @@ class MapsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         //This should go to activity but i just cant find map in it
-//        mapFragment?.getMapAsync(/*?*/)
+        mapFragment?.getMapAsync(callback)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity = context as MainActivity;
     }
 }
