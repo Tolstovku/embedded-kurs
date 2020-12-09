@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.example.battery.MainActivity
 import com.example.battery.R
 import com.google.android.gms.location.LocationServices
@@ -22,7 +23,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsFragment : Fragment() {
 
-    lateinit var activity : MainActivity;
     private val callback = OnMapReadyCallback { googleMap ->
         /**
          * Manipulates the map once available.
@@ -34,16 +34,19 @@ class MapsFragment : Fragment() {
          * user has installed Google Play services and returned to the app.
          */
         // EPIC kostil gigigigigigigig
-        activity.mMap = googleMap;
-        activity.initMap()
+
+        val applicationContext = context as MainActivity
+        applicationContext.mMap = googleMap
+        applicationContext.initMap()
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_maps, container, false)
+        val view = inflater.inflate(R.layout.fragment_maps, container, false)
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,6 +59,5 @@ class MapsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        activity = context as MainActivity;
     }
 }
