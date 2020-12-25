@@ -1,8 +1,19 @@
 package com.example.battery
 
+//import com.google.android.gms.maps.GoogleMap
+//import com.google.android.gms.maps.OnMapReadyCallback
+//import com.google.android.gms.maps.CameraUpdateFactory
+
+//import com.google.android.gms.maps.model.LatLng
+
+//import com.google.android.gms.tasks.Task
+
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -12,24 +23,19 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-//import com.google.android.gms.maps.GoogleMap
-//import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.material.bottomnavigation.BottomNavigationView
-//import com.google.android.gms.maps.CameraUpdateFactory
-
-//import com.google.android.gms.maps.model.LatLng
-
-//import com.google.android.gms.tasks.Task
-
 import com.example.battery.ui.home.MapsFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.places.GeoDataClient
 import com.google.android.gms.location.places.PlaceDetectionClient
 import com.google.android.gms.location.places.Places
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
+import com.google.android.material.bottomnavigation.BottomNavigationView
+
 
 //import com.google.android.gms.location.FusedLocationProviderClient
 //import com.google.android.gms.location.LocationServices
@@ -44,6 +50,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     val random = 123;
     var mLocationPermissionGranted: Boolean = false;
     lateinit var mMap: GoogleMap;
+    lateinit var locationManager: LocationManager;
     var mLastKnownLocation: Location? = null;
     lateinit var mGeoDataClient: GeoDataClient;
     lateinit var mPlaceDetectionClient: PlaceDetectionClient;
@@ -64,6 +71,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+
+
         setContentView(R.layout.activity_main)
 
         // Set up controller for Navigation
@@ -77,8 +86,40 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.navigation_map, R.id.navigation_settings, R.id.navigation_about
             )
         )
+        locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        //---------------Boiler plate code to supress SecutiyException --------------
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        // -----------------------------------------------
+        locationManager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
+            20,
+            1f, locationListener
+        )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    var locationListener = LocationListener() {
+        @Override
+        fun onLocationChanged(location : Location) {
+            println("Moved my ass")
+        }
     }
 
     private fun getLocationPermission() {
