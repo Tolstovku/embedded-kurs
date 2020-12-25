@@ -8,48 +8,72 @@
 
     <EditText
         android:id="@+id/editRad"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="196dp"
+        android:layout_width="218dp"
+        android:layout_height="49dp"
+        android:layout_marginBottom="24dp"
         android:ems="10"
+        android:hint="@string/radius"
         android:inputType="number"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/editTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="96dp"
+        android:layout_width="218dp"
+        android:layout_height="47dp"
+        android:layout_marginBottom="20dp"
         android:ems="10"
+        android:hint="@string/temp"
         android:inputType="number"
         app:layout_constraintBottom_toTopOf="@+id/editRad"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="96dp"
-        android:text="@string/appllyconfig"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="89dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/applly"
+        app:layout_constraintBottom_toTopOf="@+id/textViewStatus"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="108dp"
-        android:layout_height="32dp"
-        android:text="TextView"
+        android:layout_width="378dp"
+        android:layout_height="63dp"
+        android:layout_marginTop="36dp"
+        android:gravity="center_horizontal"
         app:layout_constraintBottom_toTopOf="@+id/editTemp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.515"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewStatus"
+        android:layout_width="204dp"
+        android:layout_height="37dp"
+        android:layout_marginBottom="48dp"
+        android:text="HeaterStatus"
+        android:gravity="center_horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/switchOnOff"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Switch
+        android:id="@+id/switchOnOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="180dp"
+        android:text="Off"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.493" />
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

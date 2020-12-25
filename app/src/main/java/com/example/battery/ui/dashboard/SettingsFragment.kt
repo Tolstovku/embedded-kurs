@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
@@ -22,6 +23,8 @@ class SettingsFragment : Fragment() {
     private lateinit var editTemp: EditText
     private lateinit var editRad: EditText
     private lateinit var textView: TextView
+    private lateinit var heaterStatus: TextView
+    private lateinit var switchOnOff : Switch
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,14 +32,19 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
-        var button = root.findViewById<Button>(R.id.button)
-        textView = root.findViewById<TextView>(R.id.textView)
+        val button = root.findViewById<Button>(R.id.button)
+
+        textView = root.findViewById(R.id.textView)
+        heaterStatus = root.findViewById(R.id.textViewStatus)
+        switchOnOff = root.findViewById(R.id.switchOnOff)
+
         onCreateRequest()
+
         button.setOnClickListener {
             changeConfig()
         }
-        editTemp = root.findViewById<EditText>(R.id.editTemp)
-        editRad = root.findViewById<EditText>(R.id.editRad)
+        editTemp = root.findViewById(R.id.editTemp)
+        editRad = root.findViewById(R.id.editRad)
         return root
     }
 
@@ -55,7 +63,7 @@ class SettingsFragment : Fragment() {
         queue.add(jsonObjectRequest)
     }
 
-    private fun changeConfig(){
+    private fun changeConfig() {
         val queue = Volley.newRequestQueue(context?.applicationContext)
         val url = "https://reqres.in/api/login"
         val jsonObject = JSONObject()
