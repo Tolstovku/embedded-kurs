@@ -12,7 +12,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
@@ -25,6 +24,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.battery.ui.home.MapsFragment
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.places.GeoDataClient
 import com.google.android.gms.location.places.PlaceDetectionClient
@@ -109,18 +109,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         locationManager.requestLocationUpdates(
             LocationManager.GPS_PROVIDER,
             20,
-            1f, locationListener
+            3f, fun (location: Location) {
+                println("EVEXOXOXO")
+            }
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
 
-    var locationListener = LocationListener() {
-        @Override
-        fun onLocationChanged(location : Location) {
-            println("Moved my ass")
-        }
-    }
+//    var locationListener = LocationListener() {
+//
+//        @Override
+//        fun onLocationChanged(location: Location) {
+//            println("Moved my ass")
+//        }
+//    };
 
     private fun getLocationPermission() {
         /*
