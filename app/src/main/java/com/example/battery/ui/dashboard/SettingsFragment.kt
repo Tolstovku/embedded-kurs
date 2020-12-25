@@ -4,48 +4,73 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.JsonRequest
 import com.android.volley.toolbox.Volley
 import com.example.battery.R
+import org.json.JSONObject
+import org.w3c.dom.Text
 
 class SettingsFragment : Fragment() {
 
     private lateinit var settingsViewModel: SettingsViewModel
+    private lateinit var editTemp: EditText
+    private lateinit var editRad: EditText
+    private lateinit var textView: TextView
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
-        settingsViewModel =
-                ViewModelProvider(this).get(SettingsViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
-        val textView: TextView = root.findViewById(R.id.text_dashboard)
-        makingRequest(textView)
+        var button = root.findViewById<Button>(R.id.button)
+        textView = root.findViewById<TextView>(R.id.textView)
+        onCreateRequest()
+        button.setOnClickListener {
+            changeConfig()
+        }
+        editTemp = root.findViewById<EditText>(R.id.editTemp)
+        editRad = root.findViewById<EditText>(R.id.editRad)
         return root
     }
 
-    fun makingRequest(textView: TextView){
+    private fun onCreateRequest() {
         val queue = Volley.newRequestQueue(context?.applicationContext)
-        val url = "https://reqres.in/"
-
-        // Request a string response from the provided URL.
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
+        val url = "https://reqres.in/api/users?page=2"
+        val jsonObjectRequest = JsonObjectRequest(Request.Method.GET,
+            url,
+            null,
             { response ->
-                // Display the first 500 characters of the response string.
-                textView.text = "Response is: ${response.substring(0, 500)}"
+                textView.text = "Response: %s".format(response.get("page"))
             },
-            { textView.text = "That didn't work!" })
+            { error ->
+            }
+        )
+        queue.add(jsonObjectRequest)
+    }
 
-// Add the request to the RequestQueue.
-        queue.add(stringRequest)
+    private fun changeConfig(){
+        val queue = Volley.newRequestQueue(context?.applicationContext)
+        val url = "https://reqres.in/api/login"
+        val jsonObject = JSONObject()
+        jsonObject.put("email", "eve.holt@reqres.in")
+        jsonObject.put("password", "cityslicka")
 
+        val jsonObjectRequest = JsonObjectRequest(Request.Method.POST,
+            url,
+            jsonObject,
+            { response ->
+                textView.text = "Response: %s".format(response.toString())
+            },
+            { error ->
+            }
+        )
+        queue.add(jsonObjectRequest)
     }
 }
