@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/navigation_about"
-        android:name="com.example.battery.ui.notifications.NotificationsFragment"
+        android:name="com.example.battery.ui.about.AboutFragment"
         android:label="@string/title_about"
         tools:layout="@layout/fragment_notifications" />
 </navigation>
