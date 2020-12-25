@@ -11,6 +11,7 @@ package com.example.battery
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
@@ -22,9 +23,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.battery.models.HeaterStatus
 import com.example.battery.ui.home.MapsFragment
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.places.GeoDataClient
 import com.google.android.gms.location.places.PlaceDetectionClient
@@ -32,6 +33,7 @@ import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -55,10 +57,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mGeoDataClient: GeoDataClient;
     lateinit var mPlaceDetectionClient: PlaceDetectionClient;
     lateinit var mFusedLocationProviderClient: FusedLocationProviderClient;
-
+    var heaterStatus: HeaterStatus = HeaterStatus.OFF;
+    var heaterLocation: Location = Location("")
+    lateinit var circleOptions: CircleOptions
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // TODO create here request to get heaterLocation AND radius AND heaterStatus
+        heaterLocation.latitude = 45.075874
+        heaterLocation.longitude = 42.017894
+
         //EVE and here maybe?
         supportFragmentManager.beginTransaction().add(R.id.map, MapsFragment(), "map").commit()
 
@@ -86,6 +94,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.navigation_map, R.id.navigation_settings, R.id.navigation_about
             )
         )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
+    }
+
+//    var locationListener = LocationListener() {
+//
+//        @Override
+//        fun onLocationChanged(location: Location) {
+//            println("Moved my ass")
+//        }
+//    };
+
+    fun initLocationUpdate() {
         locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         //---------------Boiler plate code to supress SecutiyException --------------
         if (ActivityCompat.checkSelfPermission(
@@ -110,20 +131,49 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             LocationManager.GPS_PROVIDER,
             20,
             3f, fun (location: Location) {
+                val distance = FloatArray(2)
                 println("EVEXOXOXO")
+                var prevHeaterStatus = heaterStatus;
+                Location.distanceBetween( location.getLatitude(), location.getLongitude(),
+                    circleOptions.getCenter().latitude, circleOptions.getCenter().longitude, distance);
+
+                if( distance[0] > circleOptions.getRadius() ){
+                    heaterStatus = HeaterStatus.OFF
+                } else {
+                    heaterStatus = HeaterStatus.ON
+                }
+
+                if (heaterStatus != prevHeaterStatus) {
+                    //TODO Send heaterStatusRequest
+                    println("EVE Status changed")
+                }
             }
         )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
     }
+fun drawCircle(heaterLocation: Location): Unit {
+    // Instantiating CircleOptions to draw a circle around the marker
+    circleOptions = CircleOptions()
 
-//    var locationListener = LocationListener() {
-//
-//        @Override
-//        fun onLocationChanged(location: Location) {
-//            println("Moved my ass")
-//        }
-//    };
+    // Specifying the center of the circle
+    circleOptions.center(LatLng(heaterLocation.latitude, heaterLocation.longitude))
+    println(heaterLocation.latitude)
+    println(heaterLocation.longitude)
+
+    // Radius of the circle
+    circleOptions.radius(500.0)
+
+    // Border color of the circle
+    circleOptions.strokeColor(Color.BLACK)
+
+    // Fill color of the circle
+    circleOptions.fillColor(0x30ff0000)
+
+    // Border width of the circle
+    circleOptions.strokeWidth(2f)
+
+    // Adding the circle to the GoogleMap
+    mMap.addCircle(circleOptions)
+}
 
     private fun getLocationPermission() {
         /*
@@ -223,6 +273,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         mMap = map
+        println("qwewqeqe")
         initMap()
     }
 

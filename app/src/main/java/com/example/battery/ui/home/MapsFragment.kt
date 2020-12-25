@@ -38,6 +38,8 @@ class MapsFragment : Fragment() {
         val applicationContext = context as MainActivity
         applicationContext.mMap = googleMap
         applicationContext.initMap()
+        applicationContext.drawCircle(applicationContext.heaterLocation)
+        applicationContext.initLocationUpdate()
     }
 
     override fun onCreateView(
