@@ -1,13 +1,5 @@
 package com.example.battery
 
-//import com.google.android.gms.maps.GoogleMap
-//import com.google.android.gms.maps.OnMapReadyCallback
-//import com.google.android.gms.maps.CameraUpdateFactory
-
-//import com.google.android.gms.maps.model.LatLng
-
-//import com.google.android.gms.tasks.Task
-
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -16,6 +8,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -23,13 +16,13 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.battery.models.HeaterStatus
-import com.example.battery.ui.home.MapsFragment
+import com.example.battery.ui.map.MapsFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.places.GeoDataClient
-import com.google.android.gms.location.places.PlaceDetectionClient
-import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -39,42 +32,23 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
-//import com.google.android.gms.location.FusedLocationProviderClient
-//import com.google.android.gms.location.LocationServices
-//import com.google.android.gms.location.places.GeoDataClient
-//import com.google.android.gms.location.places.PlaceDetectionClient
-//import com.google.android.gms.location.places.Places
-//
-//import com.google.android.gms.tasks.OnCompleteListener
-
-
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
-    val random = 123;
     var mLocationPermissionGranted: Boolean = false;
     lateinit var mMap: GoogleMap;
     lateinit var locationManager: LocationManager;
     var mLastKnownLocation: Location? = null;
-    lateinit var mGeoDataClient: GeoDataClient;
-    lateinit var mPlaceDetectionClient: PlaceDetectionClient;
     lateinit var mFusedLocationProviderClient: FusedLocationProviderClient;
     var heaterStatus: HeaterStatus = HeaterStatus.OFF;
     var heaterLocation: Location = Location("")
     lateinit var circleOptions: CircleOptions
+    var circleRadius: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // TODO create here request to get heaterLocation AND radius AND heaterStatus
-        heaterLocation.latitude = 45.075874
-        heaterLocation.longitude = 42.017894
+        getHeaterLocation()
 
-        //EVE and here maybe?
+        //show geopos from start application
         supportFragmentManager.beginTransaction().add(R.id.map, MapsFragment(), "map").commit()
-
-        // Construct a GeoDataClient.
-        mGeoDataClient = Places.getGeoDataClient(this, null);
-
-        // Construct a PlaceDetectionClient.
-        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -98,13 +72,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         navView.setupWithNavController(navController)
     }
 
-//    var locationListener = LocationListener() {
-//
-//        @Override
-//        fun onLocationChanged(location: Location) {
-//            println("Moved my ass")
-//        }
-//    };
 
     fun initLocationUpdate() {
         locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -117,63 +84,116 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return
         }
         // -----------------------------------------------
         locationManager.requestLocationUpdates(
             LocationManager.GPS_PROVIDER,
             20,
-            3f, fun (location: Location) {
+            3f, fun(location: Location) {
                 val distance = FloatArray(2)
                 println("EVEXOXOXO")
                 var prevHeaterStatus = heaterStatus;
-                Location.distanceBetween( location.getLatitude(), location.getLongitude(),
-                    circleOptions.getCenter().latitude, circleOptions.getCenter().longitude, distance);
+                Location.distanceBetween(
+                    location.latitude,
+                    location.longitude,
+                    circleOptions.center.latitude,
+                    circleOptions.center.longitude,
+                    distance
+                );
 
-                if( distance[0] > circleOptions.getRadius() ){
+                if (distance[0] > circleOptions.getRadius()) {
                     heaterStatus = HeaterStatus.OFF
+                    sendStop()
                 } else {
                     heaterStatus = HeaterStatus.ON
+                    sendHold()
                 }
 
                 if (heaterStatus != prevHeaterStatus) {
-                    //TODO Send heaterStatusRequest
-                    println("EVE Status changed")
+                    val toast = Toast.makeText(this, "Status changed to %s".format(heaterStatus.toString()), Toast.LENGTH_SHORT)
+                    toast.show()
                 }
             }
         )
     }
-fun drawCircle(heaterLocation: Location): Unit {
-    // Instantiating CircleOptions to draw a circle around the marker
-    circleOptions = CircleOptions()
 
-    // Specifying the center of the circle
-    circleOptions.center(LatLng(heaterLocation.latitude, heaterLocation.longitude))
-    println(heaterLocation.latitude)
-    println(heaterLocation.longitude)
+    private fun getHeaterLocation() {
+        val queue = Volley.newRequestQueue(applicationContext)
+        val urlBase = "http://fly.sytes.net:8080"
+        val urlAPI = "/GetHeaterLocation"
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET,
+            "$urlBase$urlAPI",
+            null,
+            { response ->
+                heaterLocation.latitude = response.get("x") as Double
+                heaterLocation.longitude = response.get("y") as Double
+            },
+            { error ->
+            }
+        )
+        queue.add(jsonObjectRequest)
+    }
 
-    // Radius of the circle
-    circleOptions.radius(500.0)
+    private fun sendStop() {
+        val queue = Volley.newRequestQueue(applicationContext)
+        val urlBase = "http://fly.sytes.net:8080"
+        val urlAPI = "/temperature/stop"
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET,
+            "$urlBase$urlAPI",
+            null,
+            { response ->
+                heaterStatus = HeaterStatus.OFF
+            },
+            { error ->
+            }
+        )
+        queue.add(jsonObjectRequest)
+    }
 
-    // Border color of the circle
-    circleOptions.strokeColor(Color.BLACK)
+    private fun sendHold() {
+        val queue = Volley.newRequestQueue(applicationContext)
+        val urlBase = "http://fly.sytes.net:8080"
+        val urlAPI = "/temperature/stop"
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET,
+            "$urlBase$urlAPI",
+            null,
+            { response ->
+                heaterStatus = HeaterStatus.ON
+            },
+            { error ->
+            }
+        )
+        queue.add(jsonObjectRequest)
+    }
 
-    // Fill color of the circle
-    circleOptions.fillColor(0x30ff0000)
+    fun drawCircle(heaterLocation: Location): Unit {
+        // Instantiating CircleOptions to draw a circle around the marker
+        circleOptions = CircleOptions()
 
-    // Border width of the circle
-    circleOptions.strokeWidth(2f)
+        // Specifying the center of the circle
+        circleOptions.center(LatLng(heaterLocation.latitude, heaterLocation.longitude))
+        println(heaterLocation.latitude)
+        println(heaterLocation.longitude)
 
-    // Adding the circle to the GoogleMap
-    mMap.addCircle(circleOptions)
-}
+        // Radius of the circle
+        circleOptions.radius(circleRadius)
+
+        // Border color of the circle
+        circleOptions.strokeColor(Color.BLACK)
+
+        // Fill color of the circle
+        circleOptions.fillColor(0x30ff0000)
+
+        // Border width of the circle
+        circleOptions.strokeWidth(2f)
+
+        // Adding the circle to the GoogleMap
+        mMap.addCircle(circleOptions)
+    }
 
     private fun getLocationPermission() {
         /*
@@ -222,8 +242,8 @@ fun drawCircle(heaterLocation: Location): Unit {
                 mMap.isMyLocationEnabled = true
                 mMap.uiSettings.isMyLocationButtonEnabled = true
             } else {
-                mMap.setMyLocationEnabled(false)
-                mMap.getUiSettings().setMyLocationButtonEnabled(false)
+                mMap.isMyLocationEnabled = false
+                mMap.uiSettings.isMyLocationButtonEnabled = false
                 mLastKnownLocation = null
                 getLocationPermission()
             }

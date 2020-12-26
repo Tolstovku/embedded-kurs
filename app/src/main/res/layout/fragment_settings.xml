@@ -4,40 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.dashboard.SettingsFragment">
+    tools:context=".ui.settings.SettingsFragment">
 
     <EditText
         android:id="@+id/editRad"
         android:layout_width="218dp"
         android:layout_height="49dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="4dp"
         android:ems="10"
         android:hint="@string/radius"
         android:inputType="number"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        android:importantForAutofill="no" />
 
     <EditText
         android:id="@+id/editTemp"
         android:layout_width="218dp"
         android:layout_height="47dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="40dp"
         android:ems="10"
         android:hint="@string/temp"
         android:inputType="number"
         app:layout_constraintBottom_toTopOf="@+id/editRad"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        android:importantForAutofill="no" />
 
     <Button
         android:id="@+id/button"
         android:layout_width="89dp"
         android:layout_height="50dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="300dp"
         android:text="@string/applly"
-        app:layout_constraintBottom_toTopOf="@+id/textViewStatus"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -47,6 +50,7 @@
         android:layout_height="63dp"
         android:layout_marginTop="36dp"
         android:gravity="center_horizontal"
+        android:text="RESPONSE"
         app:layout_constraintBottom_toTopOf="@+id/editTemp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.515"
@@ -54,26 +58,27 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textViewStatus"
-        android:layout_width="204dp"
-        android:layout_height="37dp"
-        android:layout_marginBottom="48dp"
-        android:text="HeaterStatus"
+        android:id="@+id/textViewTemp"
+        android:layout_width="182dp"
+        android:layout_height="23dp"
+        android:text="@string/temp"
         android:gravity="center_horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/switchOnOff"
+        app:layout_constraintBottom_toTopOf="@+id/editTemp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Switch
-        android:id="@+id/switchOnOff"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="180dp"
-        android:text="Off"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.538" />
+
+    <TextView
+        android:id="@+id/textViewRadius"
+        android:layout_width="176dp"
+        android:layout_height="23dp"
+        android:layout_marginBottom="2dp"
+        android:text="@string/radius"
+        android:gravity="center_horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/editRad"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTemp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
