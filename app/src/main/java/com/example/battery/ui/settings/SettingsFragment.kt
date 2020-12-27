@@ -40,8 +40,6 @@ class SettingsFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
         val button = root.findViewById<Button>(R.id.button)
 
-        heaterStatus = (context as MainActivity).heaterStatus
-
         textView = root.findViewById(R.id.textView)
 
         getConfig()
@@ -87,7 +85,6 @@ class SettingsFragment : Fragment() {
         )
         val jsonString = Gson().toJson(setConfigRequest)
         val jsonObject = JSONObject(jsonString)
-        println(jsonObject)
 
         val jsonObjectRequest = JsonObjectRequest(Request.Method.POST,
             "$urlBase$urlAPI",

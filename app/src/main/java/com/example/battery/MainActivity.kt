@@ -45,15 +45,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         getHeaterLocation()
 
         //show geopos from start application
         supportFragmentManager.beginTransaction().add(R.id.map, MapsFragment(), "map").commit()
 
-        // Construct a FusedLocationProviderClient.
+        // Construct a FusedLocationProviderClient DON'T KNOW WHAT IT DOES
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-
 
         setContentView(R.layout.activity_main)
 
@@ -72,52 +71,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         navView.setupWithNavController(navController)
     }
 
-
-    fun initLocationUpdate() {
-        locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        //---------------Boiler plate code to supress SecutiyException --------------
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        // -----------------------------------------------
-        locationManager.requestLocationUpdates(
-            LocationManager.GPS_PROVIDER,
-            20,
-            3f, fun(location: Location) {
-                val distance = FloatArray(2)
-                println("EVEXOXOXO")
-                var prevHeaterStatus = heaterStatus;
-                Location.distanceBetween(
-                    location.latitude,
-                    location.longitude,
-                    circleOptions.center.latitude,
-                    circleOptions.center.longitude,
-                    distance
-                );
-
-                if (distance[0] > circleOptions.getRadius()) {
-                    heaterStatus = HeaterStatus.OFF
-                    sendStop()
-                } else {
-                    heaterStatus = HeaterStatus.ON
-                    sendHold()
-                }
-
-                if (heaterStatus != prevHeaterStatus) {
-                    val toast = Toast.makeText(this, "Status changed to %s".format(heaterStatus.toString()), Toast.LENGTH_SHORT)
-                    toast.show()
-                }
-            }
-        )
-    }
-
+    // --- requests to server ----
     private fun getHeaterLocation() {
         val queue = Volley.newRequestQueue(applicationContext)
         val urlBase = "http://fly.sytes.net:8080"
@@ -156,7 +110,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun sendHold() {
         val queue = Volley.newRequestQueue(applicationContext)
         val urlBase = "http://fly.sytes.net:8080"
-        val urlAPI = "/temperature/stop"
+        val urlAPI = "/temperature/hold"
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.GET,
             "$urlBase$urlAPI",
@@ -169,6 +123,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         queue.add(jsonObjectRequest)
     }
+
+    // --- Working with map ---
+    override fun onMapReady(map: GoogleMap) {
+        mMap = map
+        initMap()
+    }
+
+    fun initMap() {
+        updateLocationUI()
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation()
+    }
+
 
     fun drawCircle(heaterLocation: Location): Unit {
         // Instantiating CircleOptions to draw a circle around the marker
@@ -195,6 +162,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.addCircle(circleOptions)
     }
 
+    // ------ COPY from devs.android from THIS to END -------
     private fun getLocationPermission() {
         /*
      * Request location permission, so that we can get the location of the
@@ -214,6 +182,57 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
             )
         }
+    }
+
+    fun initLocationUpdate() {
+        locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        //---------------Boiler plate code to supress SecutiyException --------------
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        // -----------------------------------------------
+        locationManager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
+            20,
+            3f, fun(location: Location) {
+                val distance = FloatArray(2)
+                println("EVEXOXOXO")
+                var prevHeaterStatus = heaterStatus;
+                Location.distanceBetween(
+                    location.latitude,
+                    location.longitude,
+                    circleOptions.center.latitude,
+                    circleOptions.center.longitude,
+                    distance
+                );
+
+                if (distance[0] > circleOptions.getRadius()) {
+                    heaterStatus = HeaterStatus.OFF
+                    // to server
+                    sendStop()
+                } else {
+                    heaterStatus = HeaterStatus.ON
+                    // to server
+                    sendHold()
+                }
+
+                if (heaterStatus != prevHeaterStatus) {
+                    val toast = Toast.makeText(
+                        this,
+                        "Status changed to %s".format(heaterStatus.toString()),
+                        Toast.LENGTH_SHORT
+                    )
+                    toast.show()
+                }
+            }
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -288,20 +307,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)
         }
-    }
-
-
-    override fun onMapReady(map: GoogleMap) {
-        mMap = map
-        println("qwewqeqe")
-        initMap()
-    }
-
-    fun initMap() {
-        updateLocationUI()
-
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation()
     }
 
 }
